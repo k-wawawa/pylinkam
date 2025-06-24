@@ -336,13 +336,15 @@ class SDKWrapper:
             ))
 
     def __init__(self, sdk_root_path: typing.Optional[str] = None, sdk_bin_name: typing.Optional[str] = None,
-                 sdk_log_path: typing.Optional[str] = None, sdk_license_path: typing.Optional[str] = None):
+                 sdk_log_path: typing.Optional[str] = None, sdk_license_path: typing.Optional[str] = None,
+                 sdk_permanent_licence: bool = False):
         """ Initialise the SDK, loading the required binary files.
 
         :param sdk_root_path: search path for SDK binary files, defaults to module directory
         :param sdk_bin_name: SDK binary name (on Windows remove .dll extension), defaults to platform-dependant name
         :param sdk_log_path: path for SDK logging, defaults to SDK directory
         :param sdk_license_path: path for SDL license file, defaults to SDK directory
+        :param sdk_permanent_licence: use permanent LINK licence, or not. defaults to False.
         """
         self._sdk_root_path = sdk_root_path or self._DEFAULT_SDK_ROOT_PATH
 
@@ -360,6 +362,7 @@ class SDKWrapper:
 
         self._sdk_log_path = sdk_log_path or os.path.join(self.sdk_root_path, 'Linkam.log')
         self._sdk_license_path = sdk_license_path or os.path.join(self.sdk_root_path, 'Linkam.lsk')
+        self._sdk_permanent_licence = sdk_permanent_licence
 
     def __del__(self) -> None:
         # Release SDK if connected
@@ -423,7 +426,7 @@ class SDKWrapper:
             sdk.linkamProcessMessage.restype = ctypes.c_bool
 
             # Initialise SDK
-            if not sdk.linkamInitialiseSDK(self.sdk_log_path.encode(), self.sdk_license_path.encode(), False):
+            if not sdk.linkamInitialiseSDK(self.sdk_log_path.encode(), self.sdk_license_path.encode(), self._sdk_permanent_licence):
                 raise SDKError(f"Failed to initialize Linkam SDK, check {self._sdk_log_path} for details")
 
             # Save handle
